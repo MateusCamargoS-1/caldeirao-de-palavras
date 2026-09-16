@@ -161,7 +161,9 @@ export function TypingCauldron() {
     const card = typingCardRef.current;
     const character = typedPassageRef.current?.querySelector(`[data-typed-index="${charIndex - 1}"]`) as HTMLElement | null;
     if (!card || !character) return;
-    const target = character.offsetTop - card.clientHeight * .42;
+    const cardRect = card.getBoundingClientRect();
+    const characterRect = character.getBoundingClientRect();
+    const target = card.scrollTop + (characterRect.top - cardRect.top) - card.clientHeight * .42;
     card.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
   }, [charIndex]);
   useEffect(() => {
