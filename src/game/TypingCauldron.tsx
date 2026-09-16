@@ -63,14 +63,11 @@ export function TypingCauldron() {
   const [result, setResult] = useState<{ words: number; accuracy: number } | null>(null);
   const [globalRank, setGlobalRank] = useState<{ username: string; words: number }[]>([]);
   const [rankLoaded, setRankLoaded] = useState(false);
-  const [username, setUsername] = useState(() => {
-    if (typeof window === "undefined") return "";
-    try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number } | null; return session?.lastActive && Date.now() - session.lastActive < SESSION_TTL ? session.username ?? "" : ""; } catch { return ""; }
-  });
-  const [showCreateUser, setShowCreateUser] = useState(() => {
-    if (typeof window === "undefined") return true;
-    try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number } | null; return !(session?.username && session.lastActive && Date.now() - session.lastActive < SESSION_TTL); } catch { return true; }
-  });
+  const [username, setUsername] = useState("");
+  const [showCreateUser, setShowCreateUser] = useState(true);
+  useEffect(() => {
+    try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number } | null; if (session?.username && session.lastActive && Date.now() - session.lastActive < SESSION_TTL) { setUsername(session.username); setShowCreateUser(false); } else localStorage.removeItem(PLAYER_SESSION_KEY); } catch { /* storage unavailable */ }
+  }, []);
   const createUser = useCallback(async () => {
     if (username.trim().length < 2) return;
     const { error } = await supabase.from("typing_scores").select("id").limit(1);
