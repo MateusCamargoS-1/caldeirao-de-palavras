@@ -35,6 +35,7 @@
 .is-creating-user>.game-overlay{background:rgb(58 46 34 / 34%)!important}
 .is-creating-user .game-dialog--rank{display:none}
 .game-dialog--rank>label{display:none}
+.create-user-error{position:fixed;z-index:60;left:50%;top:calc(50% + 9rem);max-width:min(30rem,calc(100vw - 3rem));transform:translateX(-50%);color:var(--color-danger);font-size:.875rem;text-align:center}
 .game-overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:1.5rem;background:rgb(58 46 34 / 34%)}
 .game-overlay .game-dialog{pointer-events:auto}
 .ad-slot{min-height:2.25rem;display:grid;place-items:center;color:var(--color-muted);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7}

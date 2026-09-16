@@ -66,7 +66,7 @@ export function TypingCauldron() {
   const [rankLoaded, setRankLoaded] = useState(false);
   const [username, setUsername] = useState("");
   const [showCreateUser, setShowCreateUser] = useState(true);
-  const [, setCreateUserError] = useState("");
+  const [createUserError, setCreateUserError] = useState("");
   const playerIdRef = useRef<string | null>(null);
   useEffect(() => {
     try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number; playerId?: string } | null; if (session?.username && session.lastActive && Date.now() - session.lastActive < SESSION_TTL) { playerIdRef.current = session.playerId ?? null; setUsername(session.username); setShowCreateUser(false); } else localStorage.removeItem(PLAYER_SESSION_KEY); } catch { /* storage unavailable */ }
@@ -75,12 +75,13 @@ export function TypingCauldron() {
     if (username.trim().length < 2) return;
     setCreateUserError("");
     const { data, error } = await supabase.from("typing_players").insert({ username: username.trim() }).select("id").single();
-    if (error) { setCreateUserError("Não foi possível criar o usuário agora. Tente novamente."); return; }
-    playerIdRef.current = data?.id ?? null; localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username: username.trim(), lastActive: Date.now(), playerId: playerIdRef.current })); setShowCreateUser(false);
+    if (error) { console.error("Supabase player creation failed", error); setCreateUserError(`Não foi possível criar o usuário: ${error.message}`); return; }
+    if (!data?.id) { setCreateUserError("O Supabase não retornou um identificador de usuário. Tente novamente."); return; }
+    playerIdRef.current = data.id; localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username: username.trim(), lastActive: Date.now(), playerId: playerIdRef.current })); setShowCreateUser(false);
   }, [username]);
   useEffect(() => {
     if (showCreateUser || !username) return;
-    const touch = () => localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username, lastActive: Date.now() }));
+    const touch = () => localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username, playerId: playerIdRef.current, lastActive: Date.now() }));
     window.addEventListener("pointerdown", touch); window.addEventListener("keydown", touch);
     return () => { window.removeEventListener("pointerdown", touch); window.removeEventListener("keydown", touch); };
   }, [showCreateUser, username]);
@@ -198,6 +199,7 @@ export function TypingCauldron() {
   const completed = completedWords;
   return <div ref={rootRef} tabIndex={0} onPointerDown={() => rootRef.current?.focus()} className={`min-h-dvh bg-bg text-ink outline-none ${showCreateUser ? "is-creating-user" : ""}`}>
     {showCreateUser && <div className="game-overlay" style={{ zIndex: 50, background: "var(--color-bg)" }}><div className="game-dialog"><p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">Caldeirão de Palavras</p><h2 className="mt-3 text-3xl font-semibold text-ink">Crie seu usuário</h2><p className="mt-3 text-sm leading-6 text-muted">Escolha um nome para registrar suas pontuações.</p><input autoFocus value={username} maxLength={24} onChange={(event) => setUsername(event.target.value)} placeholder="Nome de usuário" className="mt-5 h-11 w-full rounded-xl border border-border bg-surface-raised px-3 text-ink outline-none focus:border-accent" /><button type="button" disabled={username.trim().length < 2} onClick={() => void createUser()} className="mt-5 min-h-11 rounded-xl bg-accent px-5 font-semibold text-bg disabled:opacity-50">Criar usuário</button></div></div>}
+    {showCreateUser && createUserError && <p className="create-user-error" role="alert">{createUserError}</p>}
     <div className="reservoir-layout">
       <section className="reservoir-stage" aria-label="Recipiente de palavras">
         <canvas ref={canvasRef} onPointerMove={(event) => { if (event.buttons) { const rect = event.currentTarget.getBoundingClientRect(); reservoirRef.current.disturb(event.clientX - rect.left, event.clientY - rect.top); } }} className="h-full w-full" />
