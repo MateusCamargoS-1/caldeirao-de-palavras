@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Typing Cauldron — 2D</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#f0e8dc;font-family:'Outfit',system-ui,sans-serif;color:#3a2e22;user-select:none}
+#game{position:absolute;inset:0;display:block;width:100%;height:100%}
+#ui{position:absolute;inset:0;pointer-events:none;z-index:10;display:flex;flex-direction:column;align-items:center}
+.top-bar{width:100%;padding:22px 32px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.recipe-name{font-size:1rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#5a4a38}
+.recipe-origin{font-size:.7rem;letter-spacing:.08em;color:#9a8568;margin-top:2px}
+.timer{font-family:'JetBrains Mono',monospace;font-size:1.45rem;font-weight:600;color:#4a3a2a;letter-spacing:.04em}
+.timer.warning{color:#c4682a}
+.timer.critical{color:#c43a2a;animation:pulse .4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.6}}
+.combo{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:600;color:#c47820;opacity:0;transform:scale(.85);transition:opacity .15s,transform .15s;min-width:48px;text-align:right}
+.combo.active{opacity:1;transform:scale(1)}
+.combo.high{color:#d45a10}
+.word-area{position:absolute;top:22%;left:50%;transform:translateX(-50%);text-align:center;width:90%;max-width:640px}
+.word-box{display:inline-block;padding:8px 20px;transition:transform .06s cubic-bezier(.22,1.5,.36,1);will-change:transform}
+.word-box.shake{animation:shake .2s ease-out}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+.word{font-size:clamp(2.4rem,5.2vw,3.6rem);font-weight:700;letter-spacing:.15em;text-transform:uppercase;line-height:1.15}
+.word .typed{color:#2a1e14;display:inline-block;transform:translateY(-1px)}
+.word .pending{color:rgba(80,60,45,.26)}
+.word .cursor{display:inline-block;width:3px;height:.78em;background:#c47820;margin-left:1px;vertical-align:-.04em;animation:blink .8s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.progress-track{height:3px;background:rgba(80,60,45,.12);border-radius:2px;margin:12px auto 0;width:100%;max-width:220px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#d4a050,#e8b860);border-radius:2px;transition:width .09s cubic-bezier(.22,1,.36,1)}
+.counter{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);font-size:.72rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(80,60,45,.42)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(240,232,220,.94);backdrop-filter:blur(8px);z-index:20;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.screen.visible{opacity:1;pointer-events:auto}
+.screen h1{font-size:2.3rem;font-weight:700;letter-spacing:.05em;color:#3a2e22;margin-bottom:6px}
+.screen .sub{font-size:.9rem;color:#9a8568;letter-spacing:.08em;margin-bottom:28px}
+.btn{pointer-events:auto;background:#3a2e22;color:#f0e8dc;border:none;padding:12px 34px;font-family:'Outfit',sans-serif;font-size:.92rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:transform .1s,background .1s}
+.btn:hover{background:#5a4a38;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:8px 32px;margin:18px 0 26px;font-family:'JetBrains Mono',monospace;font-size:.88rem}
+.results .l{color:#9a8568;text-align:right}
+.results .v{color:#3a2e22;font-weight:600}
+.cd{font-size:5.2rem;font-weight:700;color:#3a2e22;animation:pop .45s cubic-bezier(.22,1.5,.36,1)}
+@keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+.hint{position:absolute;bottom:26px;font-size:.72rem;color:rgba(80,60,45,.38);letter-spacing:.05em}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="ui">
+<div class="top-bar">
+<div><div class="recipe-name" id="r-name">—</div><div class="recipe-origin" id="r-origin">—</div></div>
+<div class="timer" id="timer">00:00</div>
+<div class="combo" id="combo">x1</div>
+</div>
+<div class="word-area">
+<div class="word-box" id="word-box">
+<div class="word" id="word"></div>
+<div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+</div>
+</div>
+<div class="counter" id="counter">Ingrediente 0 / 0</div>
+</div>
+<div class="screen visible" id="s-menu">
+<h1>TYPING CAULDRON</h1>
+<p class="sub">Transforme palavras em ingredientes</p>
+<button class="btn" id="btn-start">Começar</button>
+<p class="hint">Digite. Cada letra alimenta o caldeirão.</p>
+</div>
+<div class="screen" id="s-cd"><div class="cd" id="cd-num">3</div></div>
+<div class="screen" id="s-result">
+<h1 id="res-title">Receita Concluída</h1>
+<p class="sub" id="res-recipe">—</p>
+<div class="results">
+<div class="l">Tempo</div><div class="v" id="res-time">—</div>
+<div class="l">Precisão</div><div class="v" id="res-acc">—</div>
+<div class="l">WPM</div><div class="v" id="res-wpm">—</div>
+<div class="l">Combo Máx</div><div class="v" id="res-combo">—</div>
+<div class="l">Pontuação</div><div class="v" id="res-score">—</div>
+</div>
+<button class="btn" id="btn-again">Jogar Novamente</button>
+</div>
+<div class="screen" id="s-fail">
+<h1>Tempo Esgotado</h1>
+<p class="sub">O caldeirão esfriou...</p>
+<button class="btn" id="btn-retry">Tentar de Novo</button>
+</div>
+<script src="game.js"></script>
+</body>
+</html>

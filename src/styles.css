@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #f0e8dc;
+  --color-bg-deep: #e8dcc8;
+  --color-surface: #f6eee3;
+  --color-surface-raised: #fff8ed;
+  --color-ink: #3a2e22;
+  --color-muted: #9a8568;
+  --color-accent: #c47820;
+  --color-border: #d5c6ae;
+  --color-danger: #b9483f;
+  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.reservoir-layout{display:grid;min-height:100dvh;grid-template-columns:minmax(16rem,.52fr) minmax(30rem,1.2fr);gap:2rem;max-width:96rem;margin:0 auto;padding:1.25rem}.reservoir-stage{position:relative;min-height:calc(100dvh - 2.5rem);overflow:hidden;border:1px solid var(--color-border);border-radius:1.5rem;background:var(--color-bg-deep)}.reservoir-copy{display:flex;min-width:0;flex-direction:column;padding:clamp(2rem,7vh,5rem) clamp(1rem,4vw,4rem)}.typing-passage{max-width:100%;overflow-wrap:anywhere;word-break:normal}.game-overlay,.countdown-overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:1.5rem;background:rgb(58 46 34 / 34%)}.game-dialog{width:min(100%,34rem);border:1px solid var(--color-border);border-radius:1.5rem;background:var(--color-surface);padding:clamp(1.5rem,5vw,3rem);box-shadow:0 24px 80px rgb(58 46 34 / 18%)}.countdown-overlay{background:rgb(240 232 220 / 58%);color:var(--color-accent);font-family:var(--font-mono);font-size:clamp(5rem,16vw,12rem);font-weight:600}.word-filled,.word-dim{transition:opacity 120ms ease,color 120ms ease}.word-filled{color:var(--color-ink);opacity:1}.word-dim{color:var(--color-ink);opacity:.25}@keyframes word-enter{from{opacity:.35;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.reservoir-layout{display:grid;min-height:100dvh;grid-template-columns:minmax(16rem,.52fr) minmax(30rem,1.2fr);gap:2rem;max-width:96rem;margin:0 auto;padding:1.25rem}.reservoir-stage{position:relative;min-height:calc(100dvh - 2.5rem);overflow:hidden;border:1px solid var(--color-border);border-radius:1.5rem;background:var(--color-bg-deep)}.reservoir-copy{display:flex;min-width:0;flex-direction:column;padding:clamp(2rem,7vh,5rem) clamp(1rem,4vw,4rem)}.typing-passage{max-width:100%;overflow-wrap:anywhere;word-break:normal}.game-overlay,.countdown-overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:1.5rem;background:rgb(58 46 34 / 34%)}.game-dialog{width:min(100%,34rem);border:1px solid var(--color-border);border-radius:1.5rem;background:var(--color-surface);padding:clamp(1.5rem,5vw,3rem);box-shadow:0 24px 80px rgb(58 46 34 / 18%)}.countdown-overlay{background:rgb(240 232 220 / 58%);color:var(--color-accent);font-family:var(--font-mono);font-size:clamp(5rem,16vw,12rem);font-weight:600}.word-filled,.word-dim{transition:opacity 120ms ease,color 120ms ease}.word-filled{color:var(--color-ink);opacity:1}.word-dim{color:var(--color-ink);opacity:.25}@keyframes word-enter{from{opacity:.35;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media (max-width:900px){.reservoir-layout{grid-template-columns:1fr;gap:0;padding:0}.reservoir-stage{min-height:44dvh;border-width:0 0 1px;border-radius:0}.reservoir-copy{min-height:56dvh;padding:2rem 1.25rem}}@media (prefers-reduced-motion:reduce){.word-stage{animation:none}}
+
+/* Keep the game frame fixed; only the long typing card is scrollable. */
+.reservoir-layout{height:100dvh;max-height:100dvh;min-height:0;overflow:hidden}
+.reservoir-stage{height:calc(100dvh - 2.5rem);min-height:0}
+.reservoir-copy{min-height:0;overflow:hidden}
+.typing-card{min-height:0;max-height:min(56dvh,36rem);overflow-y:auto;scroll-behavior:smooth}
+.typing-card{scrollbar-width:thin;scrollbar-color:var(--color-border) transparent;overscroll-behavior:contain;padding-right:clamp(1.25rem,2vw,2rem)}
+.typing-card::-webkit-scrollbar{width:.55rem}
+.typing-card::-webkit-scrollbar-track{margin:.9rem 0;border-radius:999px;background:transparent}
+.typing-card::-webkit-scrollbar-thumb{border:2px solid transparent;border-radius:999px;background:var(--color-border);background-clip:padding-box;transition:background-color 180ms ease}
+.typing-card:hover{scrollbar-color:var(--color-muted) transparent}
+.typing-card:hover::-webkit-scrollbar-thumb{background:var(--color-muted);background-clip:padding-box}
+.game-dialog--rank{max-height:85dvh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--color-border) transparent}
+.reservoir-stage>canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+@media (max-width:900px){.reservoir-layout{height:auto;max-height:none;overflow:visible}.reservoir-stage{height:44dvh;min-height:44dvh}.reservoir-copy{height:56dvh;min-height:56dvh;overflow:hidden}.typing-card{max-height:38dvh}}
+
+@layer base {
+  html,
+  body,
+  #app {
+    height: 100%;
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    overflow: hidden;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
