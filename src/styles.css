@@ -35,8 +35,8 @@
 .is-creating-user>.game-overlay{background:rgb(58 46 34 / 34%)!important}
 .is-creating-user .game-dialog--rank{display:none}
 .game-dialog--rank>label{display:none}
-.game-overlay{position:absolute;inset:auto 1.5rem auto auto;display:block;padding:0;background:transparent;pointer-events:none}
-.game-overlay .game-dialog{pointer-events:auto;margin-top:1.5rem}
+.game-overlay{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:1.5rem;background:rgb(58 46 34 / 34%)}
+.game-overlay .game-dialog{pointer-events:auto}
 .ad-slot{min-height:2.25rem;display:grid;place-items:center;color:var(--color-muted);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
 .ad-slot:has(.adsbygoogle){min-height:5.625rem}
 @media (max-width:900px){.ad-slot{min-height:1.75rem}.ad-slot:has(.adsbygoogle){min-height:5.625rem}}
