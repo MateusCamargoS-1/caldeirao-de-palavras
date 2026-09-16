@@ -165,7 +165,7 @@ export class WordReservoir {
     if (this.flow > 0) {
       ctx.fillStyle = "#f47a16";
       ctx.globalAlpha = Math.min(1, this.flow * 4);
-      ctx.fillRect(Math.round(g.nozzleX - 2), Math.round(g.nozzleBottom + 5), GRAIN_SIZE, GRAIN_SIZE);
+      ctx.fillRect(Math.round(g.nozzleX - 8), Math.round(g.nozzleBottom + 5), GRAIN_SIZE, GRAIN_SIZE);
       ctx.globalAlpha = 1;
     }
 
@@ -231,6 +231,6 @@ export class WordReservoir {
 
     // Single outlet, centered directly under the thick faucet body.
     ctx.fillStyle = orange;
-    ctx.fillRect(nozzleX - 4, pipeY + 46, 8, 9);
+    ctx.fillRect(nozzleX - 10, pipeY + 46, 8, 9);
   }
 }
