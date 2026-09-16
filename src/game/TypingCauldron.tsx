@@ -56,6 +56,7 @@ export function TypingCauldron() {
   const [passage, setPassage] = useState("");
   const [charIndex, setCharIndex] = useState(0);
   const [mistakeIndices, setMistakeIndices] = useState<number[]>([]);
+  const [mistakeCount, setMistakeCount] = useState(0);
   const [completedWords, setCompletedWords] = useState(0);
   const [wordGoal, setWordGoal] = useState(() => countWords(TEXTS[0]));
   const [timeLeft, setTimeLeft] = useState(420);
@@ -89,7 +90,7 @@ export function TypingCauldron() {
     const nextPassage = makePassage(seed, targetLength);
     passageRef.current = nextPassage; charIndexRef.current = 0; pendingDeadKeyRef.current = false; completedWordsRef.current = 0; mistakesRef.current = 0;
     submittedScoreRef.current = false;
-    reservoirRef.current.clear(); setPassage(nextPassage); setCharIndex(0); setMistakeIndices([]); setCompletedWords(0); setWordGoal(countWords(nextPassage)); setTimeLeft(420); setResult(null);
+    reservoirRef.current.clear(); setPassage(nextPassage); setCharIndex(0); setMistakeIndices([]); setMistakeCount(0); setCompletedWords(0); setWordGoal(countWords(nextPassage)); setTimeLeft(420); setResult(null);
   }, []);
   const start = useCallback(async () => {
     try { await audioRef.current.unlock(); } catch { /* audio is optional */ }
@@ -152,7 +153,7 @@ export function TypingCauldron() {
       const expected = passageRef.current[charIndexRef.current];
       const matches = expected && matchesComposedCharacter(expected, event.key, pendingDeadKeyRef.current);
       pendingDeadKeyRef.current = false;
-      if (!matches) { mistakesRef.current += 1; setMistakeIndices((current) => [...current, charIndexRef.current]); audioRef.current.miss(); if (mistakesRef.current > 10) finish(false); return; }
+      if (!matches) { mistakesRef.current += 1; setMistakeCount(mistakesRef.current); setMistakeIndices((current) => [...current, charIndexRef.current]); audioRef.current.miss(); if (mistakesRef.current > 10) finish(false); return; }
       const index = charIndexRef.current;
       charIndexRef.current += 1;
       setCharIndex(charIndexRef.current);
@@ -197,7 +198,7 @@ export function TypingCauldron() {
       </section>
       <main className="reservoir-copy">
         <AdSlot slot="7517008804" />
-        <header className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">Caldeirão de palavras</p><h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Encha o recipiente.</h1></div><div className={`font-mono text-2xl font-semibold tabular-nums ${timeLeft < 12 ? "text-danger" : "text-accent"}`}>{formatTime(timeLeft)}</div></header>
+        <header className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">Caldeirão de palavras</p><h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Encha o recipiente.</h1></div><div className="flex items-center gap-4"><div className={`font-mono text-sm font-semibold tabular-nums ${mistakeCount >= 8 ? "text-danger" : "text-muted"}`}>Erros {mistakeCount}/10</div><div className={`font-mono text-2xl font-semibold tabular-nums ${timeLeft < 12 ? "text-danger" : "text-accent"}`}>{formatTime(timeLeft)}</div></div></header>
         <div ref={typingCardRef} className="typing-card mt-8 min-w-0 rounded-3xl border border-border bg-surface p-5 sm:p-7"><p className="text-sm leading-7 text-muted">Digite o texto exatamente como aparece: espaços, acentos e pontuação também contam. Cada letra correta abre a torneira e deixa um grão cair.</p><p ref={typedPassageRef} className="typing-passage mt-5 text-lg leading-9 text-ink" aria-live="polite">{passage.split("").map((character, index) => <span data-typed-index={index} key={`${character}-${index}`} className={mistakeIndices.includes(index) ? "word-mistake" : index < charIndex ? "word-filled" : "word-dim"}>{character}</span>)}</p></div>
         <div className="mt-auto flex items-center justify-between border-t border-border pt-5 text-sm text-muted"><span>{completed} de {wordGoal} palavras</span><span>Meta: encher antes de 07:00</span></div><AdSlot slot="3358271946" format="autorelaxed" />
       </main>
