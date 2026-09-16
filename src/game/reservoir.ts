@@ -35,7 +35,7 @@ export class WordReservoir {
     this.flow = .28;
     this.particles.push({
       id,
-      x: geometry.nozzleX + ((id % 3) - 1) * .35,
+      x: geometry.nozzleX - 6 + ((id % 3) - 1) * .35,
       y: geometry.nozzleBottom + 3,
       vy: 34,
       color: COLORS[id % COLORS.length],
