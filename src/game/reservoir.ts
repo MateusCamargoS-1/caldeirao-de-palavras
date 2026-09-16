@@ -45,6 +45,17 @@ export class WordReservoir {
     });
   }
 
+  disturb(x: number, y: number) {
+    for (const grain of this.particles) {
+      if (Math.abs(grain.x - x) < 28 && Math.abs(grain.y - y) < 28) {
+        grain.settled = false;
+        grain.column = -1;
+        grain.row = -1;
+        grain.vy = -35;
+      }
+    }
+  }
+
   update(dt: number, width: number, height: number) {
     this.width = Math.max(1, width);
     this.height = Math.max(1, height);

@@ -4,7 +4,7 @@ declare global { interface Window { adsbygoogle?: unknown[] } }
 
 /** Responsive AdSense slot. It stays visually quiet until a publisher id is configured. */
 export function AdSlot({ slot, label = "Publicidade" }: { slot: string; label?: string }) {
-  const client = import.meta.env.VITE_ADSENSE_CLIENT_ID as string | undefined;
+  const client = (import.meta.env.VITE_ADSENSE_CLIENT_ID as string | undefined) || "ca-pub-5115390230838752";
   useEffect(() => {
     if (!client || document.querySelector("script[data-adsense-loader]")) return;
     const script = document.createElement("script");
