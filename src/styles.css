@@ -32,6 +32,9 @@
 .game-dialog--rank{max-height:85dvh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--color-border) transparent}
 .reservoir-stage>canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 .word-mistake{color:#c2413b!important;opacity:1!important;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.ad-slot{min-height:2.25rem;display:grid;place-items:center;color:var(--color-muted);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+.ad-slot:has(.adsbygoogle){min-height:5.625rem}
+@media (max-width:900px){.ad-slot{min-height:1.75rem}.ad-slot:has(.adsbygoogle){min-height:5.625rem}}
 @media (max-width:900px){.reservoir-layout{height:auto;max-height:none;overflow:visible}.reservoir-stage{height:44dvh;min-height:44dvh}.reservoir-copy{height:56dvh;min-height:56dvh;overflow:hidden}.typing-card{max-height:38dvh}}
 
 @layer base {
