@@ -3,7 +3,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "Caldeirão de Palavras";
+const APP_NAME = "Cauldron of Words";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -13,7 +13,7 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "Transforme palavras em ingredientes. Digite receitas reais e encha o caldeirão.",
+        content: "Turn words into grains. Type the story and fill the cauldron.",
       },
       { name: "theme-color", content: "#f0e8dc" },
     ],
@@ -29,7 +29,7 @@ export const Route = createRootRoute({
     ],
   }),
   component: () => (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5115390230838752" crossOrigin="anonymous" />
