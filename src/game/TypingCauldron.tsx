@@ -9,6 +9,10 @@ const SEED_TEXTS = [
   "Na madrugada em que o sino da torre parou, Lia encontrou uma chave azul dentro do velho livro do avô. A chave abriu uma porta escondida sob a oficina e revelou um corredor cheio de mapas, frascos vazios e pequenas estrelas desenhadas na pedra. No fim do corredor havia um recipiente transparente ligado a uma torneira antiga. O avô chamava aquele lugar de sala das palavras, porque cada frase guardava um grão de memória. Lia decidiu continuar a história antes que o relógio marcasse meia noite. Ela escreveu sobre a vila adormecida, sobre o rio que brilhava sob a lua e sobre a coragem de quem escolhe seguir uma luz desconhecida. A cada caractere, um grão atravessava o bico da torneira, caía no fundo e encontrava equilíbrio entre os outros. Quando a pilha cresceu, o peso abriu novos caminhos e os grãos deslizaram pelas laterais, formando uma pequena montanha cor de cobre. Lia entendeu então que nenhuma palavra desaparece: algumas ficam no alto, outras encontram abrigo no fundo, mas todas participam da mesma paisagem. Ao amanhecer, o sino voltou a tocar. Ela fechou o livro, guardou a chave e prometeu retornar na noite seguinte para descobrir o que havia depois da última página.",
   "No primeiro dia do inverno, Tomás recebeu uma carta sem assinatura, selada com cera vermelha. O mapa desenhado no verso levava até a estufa abandonada atrás da estação, onde as plantas cresciam em silêncio e o vidro refletia um céu cheio de nuvens. Sobre a mesa central havia um recipiente claro, uma torneira de bronze e uma frase incompleta esperando por ele. Tomás começou a escrever devagar, descrevendo o trem que cruzava a serra, a raposa que observava os trilhos e a promessa de voltar para casa antes da neve. Cada caractere liberava um grão pequeno, que caía, batia nos vizinhos e se acomodava no lugar mais estável. Aos poucos, o fundo se encheu e a pilha ganhou uma inclinação suave. Ele percebeu que o mapa não indicava um tesouro escondido, mas o caminho de uma história que precisava ser terminada. Quando a última palavra encontrou a página, a torneira silenciou e a estufa se iluminou por dentro. Tomás dobrou a carta com cuidado e saiu para contar a descoberta a alguém que ainda acreditasse em caminhos impossíveis.",
 ]; 
+const ENGLISH_SEED_TEXTS = [
+  "On the night the old clock stopped, Maya found a blue key inside her grandfather's book. It opened a hidden door below the workshop and revealed a room of maps, empty jars, and tiny stars painted on stone. At the end stood a clear container connected to an antique faucet. Every sentence held one grain of memory. Maya typed about the sleeping village, the river shining beneath the moon, and the courage it takes to follow an unknown light. With every character, one small grain passed through the faucet, fell to the bottom, and found a steady place among the others.",
+  "On the first day of winter, Theo received a letter sealed with red wax. A map on the back led to an abandoned greenhouse behind the station. On the central table sat a clear container, a bronze faucet, and an unfinished sentence. Theo typed slowly, describing the train crossing the hills, the fox watching the rails, and a promise to return home before the snow. Each character released a grain that landed, touched its neighbors, and settled into the most stable place. Little by little, the bottom filled and the pile took on a gentle slope.",
+];
 const estimateParticleCapacity = (width: number, height: number) => {
   const usableWidth = width * .8 + 17;
   const usableHeight = height * .665 - 4;
@@ -65,6 +69,7 @@ export function TypingCauldron() {
   const [globalRank, setGlobalRank] = useState<{ username: string; words: number }[]>([]);
   const [rankLoaded, setRankLoaded] = useState(false);
   const [username, setUsername] = useState("");
+  const [language, setLanguage] = useState<"en" | "pt">("en");
   const [showCreateUser, setShowCreateUser] = useState(true);
   const [createUserError, setCreateUserError] = useState("");
   const playerIdRef = useRef<string | null>(null);
@@ -88,14 +93,15 @@ export function TypingCauldron() {
   const setPhaseBoth = (next: Phase) => { phaseRef.current = next; setPhase(next); };
 
   const prepareRound = useCallback(() => {
-    const seed = SEED_TEXTS[Math.floor(Math.random() * SEED_TEXTS.length)];
+    const seeds = language === "en" ? ENGLISH_SEED_TEXTS : SEED_TEXTS;
+    const seed = seeds[Math.floor(Math.random() * seeds.length)];
     const canvas = canvasRef.current;
     const targetLength = estimateParticleCapacity(canvas?.clientWidth ?? 360, canvas?.clientHeight ?? 535);
     const nextPassage = makePassage(seed, targetLength);
     passageRef.current = nextPassage; charIndexRef.current = 0; pendingDeadKeyRef.current = false; completedWordsRef.current = 0; mistakesRef.current = 0;
     submittedScoreRef.current = false;
     reservoirRef.current.clear(); setPassage(nextPassage); setCharIndex(0); setMistakeIndices([]); setMistakeCount(0); setCompletedWords(0); setWordGoal(countWords(nextPassage)); setTimeLeft(420); setResult(null);
-  }, []);
+  }, [language]);
   const start = useCallback(async () => {
     try { await audioRef.current.unlock(); } catch { /* audio is optional */ }
     prepareRound(); setCountdown(3); setPhaseBoth("countdown"); rootRef.current?.focus();
@@ -119,7 +125,7 @@ export function TypingCauldron() {
 
   useEffect(() => {
     if (phase !== "menu") return;
-    const preview = makePassage(SEED_TEXTS[0], 9000);
+    const preview = makePassage((language === "en" ? ENGLISH_SEED_TEXTS : SEED_TEXTS)[0], 9000);
     passageRef.current = preview;
     let index = 0;
     const timer = window.setInterval(() => {
@@ -128,7 +134,7 @@ export function TypingCauldron() {
       if (index % 3 === 0) reservoirRef.current.addParticle();
     }, 105);
     return () => window.clearInterval(timer);
-  }, [phase]);
+  }, [language, phase]);
 
   useEffect(() => {
     if (phase !== "countdown") return;
@@ -199,6 +205,7 @@ export function TypingCauldron() {
   const completed = completedWords;
   return <div ref={rootRef} tabIndex={0} onPointerDown={() => rootRef.current?.focus()} className={`min-h-dvh bg-bg text-ink outline-none ${showCreateUser ? "is-creating-user" : ""}`}>
     {showCreateUser && <div className="game-overlay" style={{ zIndex: 50, background: "var(--color-bg)" }}><div className="game-dialog"><p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">Cauldron of Words</p><h2 className="mt-3 text-3xl font-semibold text-ink">Create your player</h2><p className="mt-3 text-sm leading-6 text-muted">Choose a name to save your scores.</p><input autoFocus value={username} maxLength={24} onChange={(event) => setUsername(event.target.value)} placeholder="Player name" className="mt-5 h-11 w-full rounded-xl border border-border bg-surface-raised px-3 text-ink outline-none focus:border-accent" /><button type="button" disabled={username.trim().length < 2} onClick={() => void createUser()} className="mt-5 min-h-11 rounded-xl bg-accent px-5 font-semibold text-bg disabled:opacity-50">Create player</button></div></div>}
+    {showCreateUser && <div className="language-switch" aria-label="Language"><button type="button" aria-pressed={language === "en"} onClick={() => setLanguage("en")}>English</button><button type="button" aria-pressed={language === "pt"} onClick={() => setLanguage("pt")}>Português</button></div>}
     {showCreateUser && createUserError && <p className="create-user-error" role="alert">{createUserError}</p>}
     <div className="reservoir-layout">
       <section className="reservoir-stage" aria-label="Word container">
