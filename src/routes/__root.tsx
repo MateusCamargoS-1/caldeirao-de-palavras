@@ -1,9 +1,11 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "Caldeirão de Palavras";
+function ClarityAnalytics() { useEffect(() => { const w = window as Window & { clarity?: ((...args: unknown[]) => void) & { q?: unknown[][] } }; if (w.clarity || document.querySelector("script[data-clarity]")) return; w.clarity = (...args) => (w.clarity!.q ??= []).push(args); const script = document.createElement("script"); script.async = true; script.dataset.clarity = "true"; script.src = "https://www.clarity.ms/tag/yjdmy4d60"; document.head.appendChild(script); }, []); return null; }
 
 export const Route = createRootRoute({
   head: () => ({
@@ -34,6 +36,7 @@ export const Route = createRootRoute({
         <HeadContent />
       </head>
       <body>
+        <ClarityAnalytics />
         <PreviewHostBridge />
         <AuthProvider>
           <Outlet />
