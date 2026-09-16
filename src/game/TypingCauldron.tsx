@@ -21,7 +21,7 @@ const estimateParticleCapacity = (width: number, height: number) => {
 };
 const makePassage = (seed: string, targetLength: number) => {
   let passage = "";
-  while (passage.length < targetLength) passage += `${seed} `;
+  while (passage.length < targetLength) passage += `${seed}\n\n`;
   return passage.slice(0, targetLength);
 };
 const TEXTS = SEED_TEXTS.map((seed) => makePassage(seed, 9000));
@@ -162,18 +162,20 @@ export function TypingCauldron() {
       if (event.key === "Backspace") return;
       // On Portuguese keyboards, accents such as ã arrive as a dead key followed by a letter.
       if (event.key === "Dead" || event.key === "Process") { pendingDeadKeyRef.current = true; return; }
-      if (event.key.length !== 1) return;
+      const typedCharacter = event.key === "Enter" ? "\n" : event.key;
+      if (typedCharacter.length !== 1) return;
       event.preventDefault();
       const expected = passageRef.current[charIndexRef.current];
-      const matches = expected && matchesComposedCharacter(expected, event.key, pendingDeadKeyRef.current);
+      const matches = expected === "\n" ? typedCharacter === "\n" : expected && matchesComposedCharacter(expected, typedCharacter, pendingDeadKeyRef.current);
       pendingDeadKeyRef.current = false;
-      if (!matches) { mistakesRef.current += 1; setMistakeCount(mistakesRef.current); setMistakeIndices((current) => [...current, charIndexRef.current]); audioRef.current.miss(); if (mistakesRef.current > 10) finish(false); return; }
+      if (!matches) { mistakesRef.current += 1; setMistakeCount(mistakesRef.current); setMistakeIndices((current) => [...current, charIndexRef.current]); setTimeLeft((value) => Math.max(0, value - 1)); audioRef.current.miss(); return; }
       const index = charIndexRef.current;
       charIndexRef.current += 1;
       setCharIndex(charIndexRef.current);
       audioRef.current.tick(0.96 + Math.min((index % 8) * 0.025, 0.16));
       reservoirRef.current.addParticle();
       const next = passageRef.current[index + 1];
+      if (expected === "\n" && next === "\n") setTimeLeft((value) => value + 10);
       if (isLetter(expected) && !isLetter(next)) {
         audioRef.current.tok();
         completedWordsRef.current += 1;
@@ -214,8 +216,8 @@ export function TypingCauldron() {
       </section>
       <main className="reservoir-copy">
         <AdSlot slot="7517008804" />
-        <header className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">Cauldron of Words</p><h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Fill the container.</h1></div><div className="flex items-center gap-4"><div className={`font-mono text-sm font-semibold tabular-nums ${mistakeCount >= 8 ? "text-danger" : "text-muted"}`}>Mistakes {mistakeCount}/10</div><div className={`font-mono text-2xl font-semibold tabular-nums ${timeLeft < 12 ? "text-danger" : "text-accent"}`}>{formatTime(timeLeft)}</div></div></header>
-        <div ref={typingCardRef} className="typing-card mt-8 min-w-0 rounded-3xl border border-border bg-surface p-5 sm:p-7"><p className="text-sm leading-7 text-muted">Type the text exactly as it appears: spaces, accents and punctuation all count. Every correct letter opens the faucet and releases one grain.</p><p ref={typedPassageRef} className="typing-passage mt-5 text-lg leading-9 text-ink" aria-live="polite">{passage.split("").map((character, index) => <span data-typed-index={index} key={`${character}-${index}`} className={mistakeIndices.includes(index) ? "word-mistake" : index < charIndex ? "word-filled" : "word-dim"}>{character}</span>)}</p></div>
+        <header className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">Cauldron of Words</p><h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Fill the container.</h1></div><div className="flex items-center gap-4"><div className={`font-mono text-sm font-semibold tabular-nums ${mistakeCount > 0 ? "text-danger" : "text-muted"}`}>Mistakes {mistakeCount} · −1s</div><div className={`font-mono text-2xl font-semibold tabular-nums ${timeLeft < 12 ? "text-danger" : "text-accent"}`}>{formatTime(timeLeft)}</div></div></header>
+        <div ref={typingCardRef} className="typing-card mt-8 min-w-0 rounded-3xl border border-border bg-surface p-5 sm:p-7"><p className="text-sm leading-7 text-muted">Type the text exactly as it appears: spaces, accents and punctuation all count. Every mistake costs one second; finishing a paragraph earns ten seconds. Every correct letter opens the faucet and releases one grain.</p><p ref={typedPassageRef} className="typing-passage mt-5 text-lg leading-9 text-ink" aria-live="polite">{passage.split("").map((character, index) => <span data-typed-index={index} key={`${character}-${index}`} className={mistakeIndices.includes(index) ? "word-mistake" : index < charIndex ? "word-filled" : "word-dim"}>{character}</span>)}</p></div>
         <div className="mt-auto flex items-center justify-between border-t border-border pt-5 text-sm text-muted"><span>{completed} of {wordGoal} words</span><span>Goal: fill before 07:00</span></div><AdSlot slot="3358271946" format="autorelaxed" />
       </main>
     </div>
