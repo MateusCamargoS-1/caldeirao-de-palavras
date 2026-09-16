@@ -109,7 +109,7 @@ export function TypingCauldron() {
       index = (index + 1) % 260;
       setPassage(preview); setCharIndex(index);
       if (index % 3 === 0) reservoirRef.current.addParticle();
-    }, 26);
+    }, 10);
     return () => window.clearInterval(timer);
   }, [phase]);
 
