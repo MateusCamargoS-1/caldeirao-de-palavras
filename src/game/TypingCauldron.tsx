@@ -21,6 +21,8 @@ const makePassage = (seed: string, targetLength: number) => {
   return passage.slice(0, targetLength);
 };
 const TEXTS = SEED_TEXTS.map((seed) => makePassage(seed, 9000));
+const PLAYER_SESSION_KEY = "caldeirao-player-session";
+const SESSION_TTL = 1000 * 60 * 60 * 24 * 30;
 const isLetter = (character: string | undefined) => Boolean(character && /\p{L}/u.test(character));
 const matchesComposedCharacter = (expected: string, typed: string, hasDeadKey: boolean) => {
   if (typed.toLocaleLowerCase("pt-BR") === expected.toLocaleLowerCase("pt-BR")) return true;
@@ -61,13 +63,25 @@ export function TypingCauldron() {
   const [result, setResult] = useState<{ words: number; accuracy: number } | null>(null);
   const [globalRank, setGlobalRank] = useState<{ username: string; words: number }[]>([]);
   const [rankLoaded, setRankLoaded] = useState(false);
-  const [username, setUsername] = useState("");
-  const [showCreateUser, setShowCreateUser] = useState(true);
+  const [username, setUsername] = useState(() => {
+    if (typeof window === "undefined") return "";
+    try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number } | null; return session?.lastActive && Date.now() - session.lastActive < SESSION_TTL ? session.username ?? "" : ""; } catch { return ""; }
+  });
+  const [showCreateUser, setShowCreateUser] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number } | null; return !(session?.username && session.lastActive && Date.now() - session.lastActive < SESSION_TTL); } catch { return true; }
+  });
   const createUser = useCallback(async () => {
     if (username.trim().length < 2) return;
     const { error } = await supabase.from("typing_scores").select("id").limit(1);
-    if (!error) setShowCreateUser(false);
+    if (!error) { localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username: username.trim(), lastActive: Date.now() })); setShowCreateUser(false); }
   }, [username]);
+  useEffect(() => {
+    if (showCreateUser || !username) return;
+    const touch = () => localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username, lastActive: Date.now() }));
+    window.addEventListener("pointerdown", touch); window.addEventListener("keydown", touch);
+    return () => { window.removeEventListener("pointerdown", touch); window.removeEventListener("keydown", touch); };
+  }, [showCreateUser, username]);
   const setPhaseBoth = (next: Phase) => { phaseRef.current = next; setPhase(next); };
 
   const prepareRound = useCallback(() => {
