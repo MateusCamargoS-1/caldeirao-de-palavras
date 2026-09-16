@@ -6,12 +6,8 @@ declare global { interface Window { adsbygoogle?: unknown[] } }
 export function AdSlot({ slot, format = "auto", label = "Publicidade" }: { slot: string; format?: string; label?: string }) {
   const client = (import.meta.env.VITE_ADSENSE_CLIENT_ID as string | undefined) || "ca-pub-5115390230838752";
   useEffect(() => {
-    if (!client || document.querySelector("script[src*='adsbygoogle.js']")) return;
-    const script = document.createElement("script");
-    script.async = true;
-    script.crossOrigin = "anonymous";
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
-    document.head.appendChild(script);
+    if (!client) return;
+    if (!document.querySelector("script[src*='adsbygoogle.js']")) { const script = document.createElement("script"); script.async = true; script.crossOrigin = "anonymous"; script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`; document.head.appendChild(script); }
     window.adsbygoogle = window.adsbygoogle ?? [];
     window.requestAnimationFrame(() => { if (document.querySelector(".adsbygoogle")?.getBoundingClientRect().width) window.adsbygoogle?.push({}); });
   }, [client]);

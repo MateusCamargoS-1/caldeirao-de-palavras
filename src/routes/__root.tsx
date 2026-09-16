@@ -34,6 +34,9 @@ export const Route = createRootRoute({
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5115390230838752" crossOrigin="anonymous" />
+        <script dangerouslySetInnerHTML={{ __html: `window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q||[]).push(arguments)};` }} />
+        <script async src="https://www.clarity.ms/tag/yjdmy4d60" />
       </head>
       <body>
         <ClarityAnalytics />
