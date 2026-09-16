@@ -108,7 +108,7 @@ export function TypingCauldron() {
     const timer = window.setInterval(() => {
       index = (index + 1) % 260;
       setPassage(preview); setCharIndex(index);
-      reservoirRef.current.addParticle();
+      for (let particle = 0; particle < 5; particle += 1) reservoirRef.current.addParticle();
     }, 1);
     return () => window.clearInterval(timer);
   }, [phase]);
