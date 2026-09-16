@@ -66,14 +66,17 @@ export function TypingCauldron() {
   const [rankLoaded, setRankLoaded] = useState(false);
   const [username, setUsername] = useState("");
   const [showCreateUser, setShowCreateUser] = useState(true);
+  const [, setCreateUserError] = useState("");
   const playerIdRef = useRef<string | null>(null);
   useEffect(() => {
     try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number; playerId?: string } | null; if (session?.username && session.lastActive && Date.now() - session.lastActive < SESSION_TTL) { playerIdRef.current = session.playerId ?? null; setUsername(session.username); setShowCreateUser(false); } else localStorage.removeItem(PLAYER_SESSION_KEY); } catch { /* storage unavailable */ }
   }, []);
   const createUser = useCallback(async () => {
     if (username.trim().length < 2) return;
+    setCreateUserError("");
     const { data, error } = await supabase.from("typing_players").insert({ username: username.trim() }).select("id").single();
-    if (!error) { playerIdRef.current = data?.id ?? null; localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username: username.trim(), lastActive: Date.now(), playerId: playerIdRef.current })); setShowCreateUser(false); }
+    if (error) { setCreateUserError("Não foi possível criar o usuário agora. Tente novamente."); return; }
+    playerIdRef.current = data?.id ?? null; localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username: username.trim(), lastActive: Date.now(), playerId: playerIdRef.current })); setShowCreateUser(false);
   }, [username]);
   useEffect(() => {
     if (showCreateUser || !username) return;
@@ -140,6 +143,10 @@ export function TypingCauldron() {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (showCreateUser) {
+        if (event.key === "Enter") { event.preventDefault(); void createUser(); }
+        return;
+      }
       if (phaseRef.current === "menu" || phaseRef.current === "result" || phaseRef.current === "failed") {
         if (event.key === "Enter" || event.key === " ") { event.preventDefault(); void start(); } return;
       }
@@ -168,7 +175,7 @@ export function TypingCauldron() {
       if (charIndexRef.current >= passageRef.current.length) finish(true);
     };
     window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
-  }, [finish, start]);
+  }, [createUser, finish, showCreateUser, start]);
   useEffect(() => {
     if (charIndex <= 0) return;
     const card = typingCardRef.current;
