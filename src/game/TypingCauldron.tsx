@@ -65,13 +65,14 @@ export function TypingCauldron() {
   const [rankLoaded, setRankLoaded] = useState(false);
   const [username, setUsername] = useState("");
   const [showCreateUser, setShowCreateUser] = useState(true);
+  const playerIdRef = useRef<string | null>(null);
   useEffect(() => {
-    try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number } | null; if (session?.username && session.lastActive && Date.now() - session.lastActive < SESSION_TTL) { setUsername(session.username); setShowCreateUser(false); } else localStorage.removeItem(PLAYER_SESSION_KEY); } catch { /* storage unavailable */ }
+    try { const session = JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY) ?? "null") as { username?: string; lastActive?: number; playerId?: string } | null; if (session?.username && session.lastActive && Date.now() - session.lastActive < SESSION_TTL) { playerIdRef.current = session.playerId ?? null; setUsername(session.username); setShowCreateUser(false); } else localStorage.removeItem(PLAYER_SESSION_KEY); } catch { /* storage unavailable */ }
   }, []);
   const createUser = useCallback(async () => {
     if (username.trim().length < 2) return;
-    const { error } = await supabase.from("typing_scores").select("id").limit(1);
-    if (!error) { localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username: username.trim(), lastActive: Date.now() })); setShowCreateUser(false); }
+    const { data, error } = await supabase.from("typing_players").insert({ username: username.trim() }).select("id").single();
+    if (!error) { playerIdRef.current = data?.id ?? null; localStorage.setItem(PLAYER_SESSION_KEY, JSON.stringify({ username: username.trim(), lastActive: Date.now(), playerId: playerIdRef.current })); setShowCreateUser(false); }
   }, [username]);
   useEffect(() => {
     if (showCreateUser || !username) return;
@@ -101,7 +102,7 @@ export function TypingCauldron() {
     const player = username.trim().slice(0, 24);
     if (player.length >= 2 && !submittedScoreRef.current) {
       submittedScoreRef.current = true;
-      void supabase.from("typing_scores").insert({ username: player, words: completed, accuracy: Math.round((completed / Math.max(1, completed + mistakesRef.current)) * 100) });
+      void supabase.from("typing_scores").insert({ player_id: playerIdRef.current, username: player, words: completed, accuracy: Math.round((completed / Math.max(1, completed + mistakesRef.current)) * 100) });
     }
   }, [username]);
 
