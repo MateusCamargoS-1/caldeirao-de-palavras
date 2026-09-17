@@ -1,9 +1,12 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import Clarity from "@microsoft/clarity";
+import { useEffect } from "react";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "Cauldron of Words";
+const CLARITY_PROJECT_ID = "yjdmy4d60u";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -28,13 +31,19 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  component: () => (
+  component: Document,
+});
+
+function Document() {
+  useEffect(() => {
+    Clarity.init(CLARITY_PROJECT_ID);
+  }, []);
+
+  return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5115390230838752" crossOrigin="anonymous" />
-        <script dangerouslySetInnerHTML={{ __html: `window.clarity=window.clarity||function(){(window.clarity.q=window.clarity.q||[]).push(arguments)};` }} />
-        <script async src="https://www.clarity.ms/tag/yjdmy4d60" />
       </head>
       <body>
         <PreviewHostBridge />
@@ -44,5 +53,5 @@ export const Route = createRootRoute({
         <Scripts />
       </body>
     </html>
-  ),
-});
+  );
+}
