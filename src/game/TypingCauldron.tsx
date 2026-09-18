@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GameAudio } from "./audio";
 import { WordReservoir } from "./reservoir";
 import { supabase } from "../lib/supabase";
+import { AdSlot } from "../components/ad-slot";
 
 type Phase = "menu" | "countdown" | "playing" | "result" | "failed";
 const SEED_TEXTS = [
@@ -216,6 +217,7 @@ export function TypingCauldron() {
       </section>
       <main className="reservoir-copy">
         <header className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">{isPortuguese ? "Caldeirão de Palavras" : "Cauldron of Words"}</p><h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">{isPortuguese ? "Encha o recipiente." : "Fill the container."}</h1></div><div className="flex items-center gap-4"><div className={`font-mono text-sm font-semibold tabular-nums ${mistakeCount > 0 ? "text-danger" : "text-muted"}`}>{isPortuguese ? "Erros" : "Mistakes"} {mistakeCount} · −1s</div><div className={`font-mono text-2xl font-semibold tabular-nums ${timeLeft < 12 ? "text-danger" : "text-accent"}`}>{formatTime(timeLeft)}</div></div></header>
+        {phase === "playing" && <div className="game-ad-slot" aria-label="Publicidade"><AdSlot slot="7517008804" /></div>}
         <div ref={typingCardRef} className="typing-card mt-8 min-w-0 rounded-3xl border border-border bg-surface p-5 sm:p-7"><p className="text-sm leading-7 text-muted">{isPortuguese ? "Digite o texto exatamente como aparece: espaços, acentos e pontuação também contam. Cada erro custa um segundo; terminar um parágrafo ganha dez segundos. Cada letra correta abre a torneira e deixa um grão cair." : "Type the text exactly as it appears: spaces, accents and punctuation all count. Every mistake costs one second; finishing a paragraph earns ten seconds. Every correct letter opens the faucet and releases one grain."}</p><p ref={typedPassageRef} className="typing-passage mt-5 text-lg leading-9 text-ink" aria-live="polite">{passage.split("").map((character, index) => <span data-typed-index={index} key={`${character}-${index}`} className={mistakeIndices.includes(index) ? "word-mistake" : index < charIndex ? "word-filled" : "word-dim"}>{character}</span>)}</p></div>
         <div className="mt-auto flex items-center justify-between border-t border-border pt-5 text-sm text-muted"><span>{completed} of {wordGoal} words</span><span>Goal: fill before 07:00</span></div>
       </main>

@@ -44,6 +44,7 @@
 .ad-slot{min-height:2.25rem;display:grid;place-items:center;color:var(--color-muted);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
 .ad-slot:has(.adsbygoogle){min-height:5.625rem}
 @media (max-width:900px){.ad-slot{min-height:1.75rem}.ad-slot:has(.adsbygoogle){min-height:5.625rem}}
+.game-ad-slot{flex:none;min-height:5.625rem;margin-top:1.25rem;border-top:1px solid var(--color-border);border-bottom:1px solid var(--color-border)}
 
 .editorial-shell{height:100dvh;overflow-y:auto;background:var(--color-bg);color:var(--color-ink)}
 .editorial-nav,.editorial-content,.editorial-footer{width:min(100% - 2rem,72rem);margin-inline:auto}
