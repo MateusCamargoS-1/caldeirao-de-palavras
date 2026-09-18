@@ -43,7 +43,6 @@ function Document() {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5115390230838752" crossOrigin="anonymous" />
       </head>
       <body>
         <PreviewHostBridge />
